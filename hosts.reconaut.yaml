@@ -1,0 +1,29 @@
+Name: recon
+Description: |
+  This templates probes http hosts
+
+#-------------------------------------------------------------------------------
+
+Root:
+  RootCommands:
+    - Command: "httpx"
+
+#-------------------------------------------------------------------------------
+
+Commands:
+
+  - Name: "httpx"
+    Description: "http propes the given host"
+    Exec: '/bin/sh -c "cat $$FILE | httpx -silent -timeout 3 > /tmp/httpx.reconaut.tmp"'
+    ResultHandler:
+      - RunCommand: "appendHosts"
+        Parameters:
+            - Name: $$ARG
+              Value: "/tmp/httpx.reconaut.tmp"
+
+    #-------------------------------------------------------------------------------
+
+  - Name: "appendHosts"
+    Description: "Appends a file to hosts.txt"
+    Exec: 'sh -c "cat $$ARG | anew hosts.txt"'
+

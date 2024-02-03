@@ -1,0 +1,45 @@
+Name: urls  
+Description: |  
+  Passive and active URL discovery  
+  
+#-------------------------------------------------------------------------------  
+  
+Root:  
+  RootCommands:  
+    - Command: "katana"  
+    - Command: "gau"  
+  
+#-------------------------------------------------------------------------------  
+  
+Commands:  
+  
+  - Name: "katana"  
+    Description: "Active URL crawling using katana"  
+    Exec: >   
+      /bin/sh -c "cat $$FILE | katana -r /root/etc/mynameservers.txt -timeout 3 -o /tmp/katana.reconaut.tmp"  
+    ResultHandler:  
+      - RunCommand: "append"  
+        Parameters:  
+            - Name: $$ARG  
+              Value: "/tmp/katana.reconaut.tmp"  
+  
+  - Name: "gau"  
+    Description: "-OSINT URL gathering"  
+    Exec: >   
+      /bin/sh -c "cat $$FILE | gau --timeout 3 > /tmp/gau.reconaut.tmp"  
+    ResultHandler:  
+      - RunCommand: "checkappend"  
+        Parameters:  
+            - Name: $$ARG  
+              Value: "/tmp/gau.reconaut.tmp"  
+  
+    #-------------------------------------------------------------------------------  
+  
+  - Name: "checkappend"  
+    Description: "checks the URL from being alive before appending to urls.txt"  
+    Exec: 'sh -c "cat $$ARG | httpx -fc 404 | anew urls.txt"'  
+  
+  - Name: "append"  
+    Description: "Appens a file to urls.txt"  
+    Exec: 'sh -c "cat $$ARG | anew urls.txt"'  
+

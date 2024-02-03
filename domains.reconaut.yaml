@@ -1,0 +1,78 @@
+Name: recon
+Description: |
+  This template tries to enumerate various domains and subdomains.
+
+#-------------------------------------------------------------------------------
+
+Root:
+  RootCommands:
+    - Command: "sublister"
+    - Command: "crtsh"
+    - Command: "findomain"
+    - Command: "amass"
+    - Command: "ffuf"
+
+#-------------------------------------------------------------------------------
+
+Commands:
+
+  - Name: "sublister"
+    Description: |
+      "sublist3r will OSINT the target domain for subdomains"
+    Exec: 'sublist3r -d $$HOST --no-color -o /tmp/sublister.reconaut.tmp > /dev/null'
+    ResultHandler:
+      - RunCommand: "appendDomains"
+        Parameters:
+            - Name: $$ARG
+              Value: "/tmp/sublister.reconaut.tmp"
+    
+  - Name: "crtsh"
+    Description: |
+      "This command searches for domains in crt.sh"
+    Exec: 'sh -c "gocrtsh $$HOST > /tmp/crtsh.reconaut.tmp"'
+    ResultHandler:
+    ResultHandler:
+      - RunCommand: "appendDomains"
+        Parameters:
+            - Name: $$ARG
+              Value: "/tmp/crtsh.reconaut.tmp"
+
+  - Name: "ffuf"
+    Description: "Trying to fuzz subdomains with a basic wordlist"
+    Exec: > 
+      sh -c "ffuf -s -rate 20 -u https://FUZZ.$$HOST -w \$(findwordlist subdomains-top1million-5000) |
+      grep 'FUZZ :' | awk 'match(\$0, /FUZZ : ([^ ]+)/, arr) {print arr[1]}' | awk '{print \$0 \".$$HOST\"}' 
+      > /tmp/ffuf.reconaut.tmp"
+    ResultHandler:
+      - RunCommand: "appendDomains"
+        Parameters:
+            - Name: $$ARG
+              Value: "/tmp/ffuf.reconaut.tmp"
+
+  - Name: "amass"
+    Description: "Trying enumerate domains with amass"
+    Exec: > 
+      sh -c "amass enum -d $$HOST -rf $(find $HOME -name mynameservers.txt) -max-dns-queries 20000 | 
+             cut -d ' ' -f 1 | grep $$HOST  > /tmp/amass.reconaut.tmp"
+    ResultHandler:
+      - RunCommand: "appendDomains"
+        Parameters:
+            - Name: $$ARG
+              Value: "/tmp/amass.reconaut.tmp"
+
+  - Name: "findomain"
+    Description: |
+      "finddomain"
+    Exec: 'sh -c "echo $$HOST | findomain --stdin | grep -v -E -w \"==>|Searching\ in\ the|Job\ finished|Good\ luck\" > /tmp/findomain.reconaut.tmp"'
+    ResultHandler:
+      - RunCommand: "appendDomains"
+        Parameters:
+            - Name: $$ARG
+              Value: "/tmp/findomain.reconaut.tmp"
+
+    #-------------------------------------------------------------------------------
+    
+  - Name: "appendDomains"
+    Description: "Appends new line from a file to domains.txt"
+    Exec: 'sh -c "cat $$ARG | anew domains.txt"'
+
