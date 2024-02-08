@@ -1,6 +1,8 @@
-Name: recon
+Name: domains
 Description: |
-  This template tries to enumerate various domains and subdomains.
+  Domain and subdomain enumeration [domains.txt]
+     It uses a mix of OSINT- and active utilities to enumerate the domains. 
+     Tools [sublister, crtsh, findomain, amass, ffuf]
 
 #-------------------------------------------------------------------------------
 

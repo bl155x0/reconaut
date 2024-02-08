@@ -1,6 +1,7 @@
 Name: urls  
 Description: |  
-  Passive and active URL discovery  
+  Passive and active URL discovery. [urls.txt]
+     This templates combines active web crawling (katana) with an OSINT approach (gau - getallurls)
   
 #-------------------------------------------------------------------------------  
   

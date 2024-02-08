@@ -1,0 +1,19 @@
+Name: http
+Description: |
+  HTTP Content fetcher [./http]
+     Fetches HTTP headers and bodies from the list of given URLs (using fff by tomnomnom)
+
+#-------------------------------------------------------------------------------  
+
+Root:
+  RootCommands:
+    - Command: "fff"
+
+#-------------------------------------------------------------------------------  
+
+Commands:
+
+  - Name: "fff"
+    Description: "Fetching http content"
+    Exec: >
+      /bin/sh -c "rm -rf /tmp/fff && cat $$FILE | fff --delay 1000 -S -o /tmp/fff && mkdir -p ./http && cp -R /tmp/fff/* ./http/"

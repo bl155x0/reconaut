@@ -35,20 +35,6 @@ func start(projectName, templateFileName string, verbose bool, variables []strin
 		return fmt.Errorf("cannot load template \"%s\": %v\n", templateFile, err)
 	}
 
-	//
-	////Setup DB storage file
-	//projectName = getProjectName(projectName)
-	//nameSet := storage.SetFileStorageFileName(projectName)
-	//iobuffer.GetIOBuffer().AddOutput(fmt.Sprintf("Using project file \"%s\" for project \"%s\"...", nameSet, projectName))
-
-	////...init the DB
-	//if storage := storage.GetSQLiteStorage(); storage == nil {
-	//	return fmt.Errorf("Error creating db storage")
-	//}
-	//if err := storage.GetSQLiteStorage().ProcessStorageDefinitions(template.StorageDefinitions); err != nil {
-	//	return fmt.Errorf("Error processing storage template: %v\n", err)
-	//}
-
 	//parse the cmd line
 	paramMap, err := parse(variables)
 	if err != nil {

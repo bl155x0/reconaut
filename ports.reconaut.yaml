@@ -1,0 +1,35 @@
+Name: ports
+Description: |
+  Active port scanning [ports.txt]
+     Performs an nmap port scan for the hosts in the given file.
+
+#-------------------------------------------------------------------------------
+
+Root:
+  RootCommands:
+    - Command: "nmap"
+
+#-------------------------------------------------------------------------------
+
+Commands:
+
+  - Name: "nmap"
+    Description: "port scan the hosts in a given file"
+    # -il InputFile
+    # -oN outputFile
+    # -n no DNS lookup
+    # -sC default scripts
+    # -sV version detection
+    Exec: '/bin/sh -c "nnap -il $$FILE -oN ports.txt -sC -sV'
+    ResultHandler:
+      - RunCommand: "appendPorts"
+        Parameters:
+            - Name: $$ARG
+              Value: "/tmp/httpx.reconaut.tmp"
+
+    #-------------------------------------------------------------------------------
+
+  - Name: "appendPorts"
+    Description: "Appends a file to ports.txt"
+    Exec: 'sh -c "cat $$ARG | anew ports.txt"'
+

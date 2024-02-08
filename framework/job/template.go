@@ -154,6 +154,16 @@ func GetTemplateFile(filename string) string {
 	return GetTemplateFileFromDirectory(".", filename)
 }
 
+// GetTemplateFiles returns all templates in the RECONAUT_TEMPLATES directory, or, if not specified,
+// in the current directory
+func GetTemplateFiles() []string {
+	value, exists := os.LookupEnv(ENV_VAR)
+	if exists && value != "" {
+		return ListTemplatesFiles(value)
+	}
+	return ListTemplatesFiles(".")
+}
+
 // LoadTemplate loads a template from the given file
 func NewTemplateFromFile(filename string) (*Template, error) {
 	content, err := ioutil.ReadFile(filename)

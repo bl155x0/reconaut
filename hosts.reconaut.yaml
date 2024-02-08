@@ -1,6 +1,8 @@
-Name: recon
+Name: hosts
 Description: |
-  This templates probes http hosts
+  HTTP/HTTPS live probing [hosts.txt]
+     This templates probes http hosts.
+     It takes a list of domains|hosts and uses httpx in order to check if they are live.
 
 #-------------------------------------------------------------------------------
 
