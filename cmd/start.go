@@ -40,7 +40,7 @@ func start(projectName, templateFileName string, verbose bool, variables []strin
 	if err != nil {
 		return fmt.Errorf("cannot parsing the commandline arguments: %v\n", err)
 	}
-	paramMap = applyDefaultVariables(projectName, paramMap)
+	//paramMap = applyDefaultVariables(projectName, paramMap)
 
 	//Process the template provided and start
 	if err := job.ProcessTemplate(template, paramMap, workerPool); err != nil {
