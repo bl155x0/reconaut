@@ -17,7 +17,7 @@ Commands:
   - Name: "katana"  
     Description: "Active URL crawling using katana"  
     Exec: >   
-      /bin/sh -c "cat $$FILE | katana -r /root/etc/mynameservers.txt -timeout 3 -o /tmp/katana.reconaut.tmp"  
+      /bin/sh -c "cat $$FILE | katana -r /root/etc/mynameservers.txt -H \"$$COOKIE\" -timeout 3 -o /tmp/katana.reconaut.tmp"
     ResultHandler:  
       - RunCommand: "append"  
         Parameters:  
