@@ -35,6 +35,7 @@ type Command struct {
 	Name          string          `yaml:"Name"`
 	Description   string          `yaml:"Description"`
 	Exec          string          `yaml:"Exec"`
+	ExecFile      string          `yaml:"ExecFile"`
 	ResultHandler []ResultHandler `yaml:"ResultHandler"`
 }
 
@@ -154,6 +155,17 @@ func GetTemplateFile(filename string) string {
 	return GetTemplateFileFromDirectory(".", filename)
 }
 
+func GetTemplateCommandFileName(name string) string {
+	value, exists := os.LookupEnv(ENV_VAR)
+	if exists && value != "" {
+		if strings.HasSuffix(value, "/") == false {
+			return value + "/" + name
+		}
+		return value + name
+	}
+	return name
+}
+
 // GetTemplateFiles returns all templates in the RECONAUT_TEMPLATES directory, or, if not specified,
 // in the current directory
 func GetTemplateFiles() []string {
@@ -187,6 +199,13 @@ func ProcessTemplate(template *Template, rootVariables map[string]string, worker
 	// Check for for commands
 	if len(template.Root.Commands) == 0 {
 		return fmt.Errorf("missing root commands")
+	}
+
+	for _, command := range template.Commands {
+		if command.Exec != "" && command.ExecFile != "" {
+			return fmt.Errorf("ambiguous command \"%s\": \"Exec\" and \"ExecFile\" are both defined",
+				command.Name)
+		}
 	}
 
 	// Geting global root variables from the caller

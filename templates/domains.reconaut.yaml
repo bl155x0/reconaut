@@ -21,7 +21,7 @@ Commands:
   - Name: "sublister"
     Description: |
       "sublist3r will OSINT the target domain for subdomains"
-    Exec: 'sublist3r -d $$HOST --no-color -o /tmp/sublister.reconaut.tmp > /dev/null'
+    Exec: 'sh -c "rm -f /tmp/sublister.reconaut.tmp && cat $$FILE | xargs -I {} sublist3r -d {} --no-color -o /tmp/sublister.reconaut.tmp0  > /dev/null && cat /tmp/sublister.reconaut.tmp0 >> /tmp/sublister.reconaut.tmp"'
     ResultHandler:
       - RunCommand: "appendDomains"
         Parameters:
@@ -31,7 +31,7 @@ Commands:
   - Name: "crtsh"
     Description: |
       "This command searches for domains in crt.sh"
-    Exec: 'sh -c "gocrtsh $$HOST > /tmp/crtsh.reconaut.tmp"'
+    Exec: 'sh -c "cat $$FILE | xargs -I {} gocrtsh {} >> /tmp/crtsh.reconaut.tmp"'
     ResultHandler:
     ResultHandler:
       - RunCommand: "appendDomains"
@@ -42,9 +42,7 @@ Commands:
   - Name: "ffuf"
     Description: "Trying to fuzz subdomains with a basic wordlist"
     Exec: > 
-      sh -c "ffuf -s -rate 20 -u https://FUZZ.$$HOST -w \$(findwordlist subdomains-top1million-5000) |
-      grep 'FUZZ :' | awk 'match(\$0, /FUZZ : ([^ ]+)/, arr) {print arr[1]}' | awk '{print \$0 \".$$HOST\"}' 
-      > /tmp/ffuf.reconaut.tmp"
+      sh -c "rm -f /tmp/ffuf.reconaut.tmp && cat $$FILE | xargs -I {} ffuf -u https://FUZZ.{} -w $(findwordlist subdomains-top1million-5000) -json | jq -r .url | unfurl domains >> /tmp/ffuf.reconaut.tmp"
     ResultHandler:
       - RunCommand: "appendDomains"
         Parameters:
@@ -54,8 +52,7 @@ Commands:
   - Name: "amass"
     Description: "Trying enumerate domains with amass"
     Exec: > 
-      sh -c "amass enum -d $$HOST -rf $(find $HOME -name mynameservers.txt) -max-dns-queries 20000 | 
-             cut -d ' ' -f 1 | grep $$HOST  > /tmp/amass.reconaut.tmp"
+      sh -c "rm -f /tmp/amass.reconaut.tmp && cat $$FILE | xargs -I {} amass enum -d {} -rf $(find $HOME -name mynameservers.txt) -max-dns-queries 20000 | cut -d ' ' -f 1 >> /tmp/amass.reconaut.tmp"
     ResultHandler:
       - RunCommand: "appendDomains"
         Parameters:
@@ -64,8 +61,9 @@ Commands:
 
   - Name: "findomain"
     Description: |
-      "finddomain"
-    Exec: 'sh -c "echo $$HOST | findomain --stdin | grep -v -E -w \"==>|Searching\ in\ the|Job\ finished|Good\ luck\" > /tmp/findomain.reconaut.tmp"'
+      "findomain"
+    Exec: >
+       sh -c "rm -f /tmp/findomain.reconaut.tmp && findomain -f $$FILE -r -u /tmp/findomain.reconaut.tmp"
     ResultHandler:
       - RunCommand: "appendDomains"
         Parameters:

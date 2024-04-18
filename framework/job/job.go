@@ -2,6 +2,7 @@ package job
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os/exec"
 	"reconaut/iobuffer"
 	"strings"
@@ -101,6 +102,20 @@ func (job *TemplateJob) Execute() []Job {
 	}
 	job.status = JobStatusRunning
 
+	//If ExecFile is defines
+	if job.command.Exec != "" && job.command.ExecFile != "" {
+		panic("ambiguous command: \"Exec\" and \"ExecFile\" are both defined. Use just one")
+	}
+
+	// Populate the actual command from the if specified in a different file
+	if job.command.ExecFile != "" {
+		c, err := loadCommandFromFile(job.command.ExecFile)
+		if err != nil {
+			panic(err)
+		}
+		job.command.Exec = c
+	}
+
 	//Create the OS Command
 	var cmd *exec.Cmd
 	tokens, err := shellwords.Parse(job.command.Exec)
@@ -146,7 +161,7 @@ func (job *TemplateJob) Execute() []Job {
 		return nil
 	}
 
-	//Process RsultHandler
+	//Process ResultHandler
 	var nextJobs []Job
 	for _, resultHandler := range job.command.ResultHandler {
 		command := getCommandByName(job.template, resultHandler.RunCommand)
@@ -187,6 +202,15 @@ func (job *TemplateJob) Abort() {
 // GetStatus implements the GetStatus method of the Job interface for ExampleJob
 func (job *TemplateJob) GetStatus() JobStatus {
 	return job.status
+}
+
+func loadCommandFromFile(name string) (string, error) {
+	filename := GetTemplateCommandFileName(name)
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return "", err
+	}
+	return string(content), nil
 }
 
 //-------------------------------------------------------------------------------------------------
